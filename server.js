@@ -1,11 +1,257 @@
+// import express from 'express';
+// import dotenv from 'dotenv';
+// import cors from 'cors';
+// import helmet from 'helmet';
+// import morgan from 'morgan';
+// import compression from 'compression';
+// import connectDB from './src/config/database.js';
+// import { errorHandler } from './src/middleware/errorHandler.js';
+// import authRoutes from './src/routes/auth.routes.js';
+// import contentRoutes from './src/routes/content.routes.js';
+// import submissionRoutes from './src/routes/submission.routes.js';
+// import clientRoutes from './src/routes/client.routes.js';
+// import teamRoutes from './src/routes/team.routes.js';
+// import testimonialRoutes from './src/routes/testimonial.routes.js';
+// import mediaRoutes from './src/routes/media.routes.js';
+// import { startKeepAlive } from './src/utils/keepAlive.js';
+
+// dotenv.config();
+
+// const app = express();
+// const PORT = process.env.PORT || 5000;
+
+// // Connect to Database
+// connectDB();
+
+// // CORS configuration - MUST be before other middleware
+// const allowedOrigins = [
+//   'http://localhost:5173',
+//   'http://localhost:5174',
+//   'http://localhost:5001',
+//   'https://tgi-india-main.vercel.app',
+//   'https://www.talentgroupofindia.com/',
+//   'https://talentgroupofindia.com/'
+// ];
+
+// // Add FRONTEND_URL if set
+// if (process.env.FRONTEND_URL) {
+//   allowedOrigins.push(process.env.FRONTEND_URL);
+// }
+
+// console.log('🔒 CORS Allowed Origins:', allowedOrigins);
+
+
+
+
+
+
+
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     // Allow requests with no origin (like Postman, curl, or same-origin)
+//     if (!origin) {
+//       console.log('✅ CORS: Allowing request with no origin');
+//       return callback(null, true);
+//     }
+    
+//     console.log('🔍 CORS: Checking origin:', origin);
+    
+//     if (allowedOrigins.includes(origin)) {
+//       console.log('✅ CORS: Origin allowed:', origin);
+//       callback(null, true);
+//     } else {
+//       console.log('❌ CORS: Origin blocked:', origin);
+//       callback(new Error(`CORS policy: Origin ${origin} not allowed`));
+//     }
+//   },
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+//   exposedHeaders: ['Content-Range', 'X-Content-Range'],
+//   maxAge: 600,
+//   optionsSuccessStatus: 200
+// }));
+
+// // Security headers - configured to not interfere with CORS
+// app.use(helmet({
+//   crossOriginResourcePolicy: { policy: "cross-origin" },
+//   crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
+// }));
+
+// // Other middleware
+// app.use(compression());
+// app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+// app.use(express.json({ limit: '10mb' }));
+// app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// // Root endpoint
+// app.get('/', (req, res) => {
+//   res.status(200).json({
+//     success: true,
+//     message: 'TG India Backend API',
+//     version: '1.0.0',
+//     endpoints: {
+//       health: '/health',
+//       api: '/api',
+//       auth: '/api/auth',
+//       content: '/api/content'
+//     },
+//     timestamp: new Date().toISOString()
+//   });
+// });
+
+// // Health check endpoint
+// app.get('/health', (req, res) => {
+//   res.status(200).json({ 
+//     status: 'OK', 
+//     message: 'TGI Backend is running',
+//     timestamp: new Date().toISOString(),
+//     uptime: process.uptime(),
+//     memory: process.memoryUsage()
+//   });
+// });
+
+// // Handle preflight requests explicitly
+// app.options('*', cors());
+
+// // API Routes
+// app.use('/api/auth', authRoutes);
+// app.use('/api/content', contentRoutes);
+// app.use('/api/submissions', submissionRoutes);
+// app.use('/api/clients', clientRoutes);
+// app.use('/api/team', teamRoutes);
+// app.use('/api/testimonials', testimonialRoutes);
+// app.use('/api/media', mediaRoutes);
+
+// // 404 handler
+// app.use((req, res) => {
+//   res.status(404).json({ 
+//     success: false, 
+//     message: 'Route not found' 
+//   });
+// });
+
+// // Error handling middleware (must be last)
+// app.use(errorHandler);
+
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     if (!origin) {
+//       return callback(null, true);
+//     }
+
+//     console.log('🔍 CORS: Checking origin:', origin);
+
+//     if (allowedOrigins.includes(origin)) {
+//       console.log('✅ CORS: Origin allowed:', origin);
+//       return callback(null, true);
+//     }
+
+//     console.log('❌ CORS: Origin blocked:', origin);
+
+//     // ❗ IMPORTANT: Don't throw error
+//     return callback(null, false);
+//   },
+//   credentials: true
+// }));
+
+// // NEW ADDED BY ME ***************************************************
+// const corsOptions = {
+//   origin: function (origin, callback) {
+//     if (!origin) {
+//       console.log('✅ No origin → allowed');
+//       return callback(null, true);
+//     }
+
+//     console.log('🔍 Checking:', origin);
+
+//     if (allowedOrigins.includes(origin)) {
+//       console.log('✅ Allowed:', origin);
+//       return callback(null, true);
+//     }
+
+//     console.log('❌ Blocked:', origin);
+
+//     // ✅ IMPORTANT: DO NOT THROW ERROR
+//     return callback(null, false);
+//   },
+//   credentials: true
+// };
+
+// app.use(cors(corsOptions));
+// app.options('*', cors(corsOptions));
+
+// app.use((req, res, next) => {
+//   res.header("Access-Control-Allow-Origin", "https://www.talentgroupofindia.com");
+//   res.header("Access-Control-Allow-Credentials", "true");
+//   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+  
+//   if (req.method === "OPTIONS") {
+//     return res.sendStatus(200);
+//   }
+
+//   next();
+// });
+// // YAHA TAK *****************************************************
+
+// // Start server
+// const server = app.listen(PORT, '0.0.0.0', () => {
+//   console.log('='.repeat(50));
+//   console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode`);
+//   console.log(`📡 Port: ${PORT}`);
+//   console.log(`📍 Health: http://localhost:${PORT}/health`);
+//   console.log(`🔗 API: http://localhost:${PORT}/api`);
+//   console.log(`🌐 MongoDB: ${process.env.MONGODB_URI ? 'Connected' : 'Not configured'}`);
+//   console.log('='.repeat(50));
+  
+//   // Start keep-alive to prevent cold starts on Render
+//   if (process.env.NODE_ENV === 'production') {
+//     const serverUrl = process.env.SERVER_URL || 'https://tgi-india-backend.onrender.com';
+//     startKeepAlive(serverUrl);
+//   }
+// });
+
+// // Handle unhandled promise rejections
+// process.on('unhandledRejection', (err) => {
+//   console.error('❌ UNHANDLED REJECTION! Shutting down...');
+//   console.error(err.name, err.message);
+//   server.close(() => {
+//     process.exit(1);
+//   });
+// });
+
+// // Handle uncaught exceptions
+// process.on('uncaughtException', (err) => {
+//   console.error('❌ UNCAUGHT EXCEPTION! Shutting down...');
+//   console.error(err.name, err.message);
+//   process.exit(1);
+// });
+
+// // Graceful shutdown
+// process.on('SIGTERM', () => {
+//   console.log('👋 SIGTERM received. Shutting down gracefully...');
+//   server.close(() => {
+//     console.log('✅ Process terminated');
+//   });
+// });
+
+// export default app;
+
+
+
+//(******************************************************************************)
+
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
+
 import connectDB from './src/config/database.js';
 import { errorHandler } from './src/middleware/errorHandler.js';
+
 import authRoutes from './src/routes/auth.routes.js';
 import contentRoutes from './src/routes/content.routes.js';
 import submissionRoutes from './src/routes/submission.routes.js';
@@ -13,6 +259,7 @@ import clientRoutes from './src/routes/client.routes.js';
 import teamRoutes from './src/routes/team.routes.js';
 import testimonialRoutes from './src/routes/testimonial.routes.js';
 import mediaRoutes from './src/routes/media.routes.js';
+
 import { startKeepAlive } from './src/utils/keepAlive.js';
 
 dotenv.config();
@@ -20,71 +267,61 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to Database
+// ✅ Connect DB
 connectDB();
 
-// CORS configuration - MUST be before other middleware
+
+// ✅ CORS CONFIG (ONLY ONE - CLEAN)
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:5001',
   'https://tgi-india-main.vercel.app',
-  'https://www.talentgroupofindia.com/',
-  'https://talentgroupofindia.com/'
+  'https://www.talentgroupofindia.com',
+  'https://talentgroupofindia.com'
 ];
 
-// Add FRONTEND_URL if set
 if (process.env.FRONTEND_URL) {
   allowedOrigins.push(process.env.FRONTEND_URL);
 }
 
-console.log('🔒 CORS Allowed Origins:', allowedOrigins);
-
-
-
-
-
-
-
-app.use(cors({
+const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like Postman, curl, or same-origin)
-    if (!origin) {
-      console.log('✅ CORS: Allowing request with no origin');
+    if (!origin) return callback(null, true);
+
+    console.log('🔍 CORS Origin:', origin);
+
+    if (allowedOrigins.includes(origin)) {
+      console.log('✅ Allowed:', origin);
       return callback(null, true);
     }
-    
-    console.log('🔍 CORS: Checking origin:', origin);
-    
-    if (allowedOrigins.includes(origin)) {
-      console.log('✅ CORS: Origin allowed:', origin);
-      callback(null, true);
-    } else {
-      console.log('❌ CORS: Origin blocked:', origin);
-      callback(new Error(`CORS policy: Origin ${origin} not allowed`));
-    }
+
+    console.log('❌ Blocked:', origin);
+    return callback(null, false); // ❗ NEVER throw error
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 600,
-  optionsSuccessStatus: 200
-}));
+};
 
-// Security headers - configured to not interfere with CORS
+// ✅ APPLY CORS FIRST
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
+
+// ✅ SECURITY
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" }
 }));
 
-// Other middleware
+
+// ✅ OTHER MIDDLEWARE
 app.use(compression());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Root endpoint
+
+// ✅ ROOT
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,
@@ -100,7 +337,8 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health check endpoint
+
+// ✅ HEALTH
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
@@ -111,10 +349,8 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Handle preflight requests explicitly
-app.options('*', cors());
 
-// API Routes
+// ✅ ROUTES
 app.use('/api/auth', authRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/submissions', submissionRoutes);
@@ -123,7 +359,8 @@ app.use('/api/team', teamRoutes);
 app.use('/api/testimonials', testimonialRoutes);
 app.use('/api/media', mediaRoutes);
 
-// 404 handler
+
+// ✅ 404
 app.use((req, res) => {
   res.status(404).json({ 
     success: false, 
@@ -131,109 +368,57 @@ app.use((req, res) => {
   });
 });
 
-// Error handling middleware (must be last)
+
+// ✅ ERROR HANDLER (LAST)
 app.use(errorHandler);
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) {
-      return callback(null, true);
-    }
 
-    console.log('🔍 CORS: Checking origin:', origin);
-
-    if (allowedOrigins.includes(origin)) {
-      console.log('✅ CORS: Origin allowed:', origin);
-      return callback(null, true);
-    }
-
-    console.log('❌ CORS: Origin blocked:', origin);
-
-    // ❗ IMPORTANT: Don't throw error
-    return callback(null, false);
-  },
-  credentials: true
-}));
-
-// NEW ADDED BY ME ***************************************************
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) {
-      console.log('✅ No origin → allowed');
-      return callback(null, true);
-    }
-
-    console.log('🔍 Checking:', origin);
-
-    if (allowedOrigins.includes(origin)) {
-      console.log('✅ Allowed:', origin);
-      return callback(null, true);
-    }
-
-    console.log('❌ Blocked:', origin);
-
-    // ✅ IMPORTANT: DO NOT THROW ERROR
-    return callback(null, false);
-  },
-  credentials: true
-};
-
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
-
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://www.talentgroupofindia.com");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-  
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-
-  next();
-});
-// YAHA TAK *****************************************************
-
-// Start server
+// ✅ START SERVER
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log('='.repeat(50));
   console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode`);
   console.log(`📡 Port: ${PORT}`);
   console.log(`📍 Health: http://localhost:${PORT}/health`);
   console.log(`🔗 API: http://localhost:${PORT}/api`);
-  console.log(`🌐 MongoDB: ${process.env.MONGODB_URI ? 'Connected' : 'Not configured'}`);
   console.log('='.repeat(50));
-  
-  // Start keep-alive to prevent cold starts on Render
+
+  // Keep alive for Render
   if (process.env.NODE_ENV === 'production') {
     const serverUrl = process.env.SERVER_URL || 'https://tgi-india-backend.onrender.com';
     startKeepAlive(serverUrl);
   }
 });
 
-// Handle unhandled promise rejections
+
+// ✅ HANDLE ERRORS
 process.on('unhandledRejection', (err) => {
-  console.error('❌ UNHANDLED REJECTION! Shutting down...');
+  console.error('❌ UNHANDLED REJECTION!');
   console.error(err.name, err.message);
-  server.close(() => {
-    process.exit(1);
-  });
+  server.close(() => process.exit(1));
 });
 
-// Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
-  console.error('❌ UNCAUGHT EXCEPTION! Shutting down...');
+  console.error('❌ UNCAUGHT EXCEPTION!');
   console.error(err.name, err.message);
   process.exit(1);
 });
 
-// Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('👋 SIGTERM received. Shutting down gracefully...');
-  server.close(() => {
-    console.log('✅ Process terminated');
-  });
+  console.log('👋 SIGTERM received');
+  server.close(() => console.log('✅ Process terminated'));
 });
 
 export default app;
+
+
+
+
+
+
+
+
+
+
+
+
+//(******************************************************************************)
