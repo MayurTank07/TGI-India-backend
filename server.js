@@ -158,23 +158,28 @@ app.use(cors({
 // NEW ADDED BY ME ***************************************************
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-
-    console.log("🔍 Origin:", origin);
-
-    if (allowedOrigins.includes(origin)) {
+    if (!origin) {
+      console.log('✅ No origin → allowed');
       return callback(null, true);
     }
 
-    console.log("❌ Blocked:", origin);
+    console.log('🔍 Checking:', origin);
+
+    if (allowedOrigins.includes(origin)) {
+      console.log('✅ Allowed:', origin);
+      return callback(null, true);
+    }
+
+    console.log('❌ Blocked:', origin);
+
+    // ✅ IMPORTANT: DO NOT THROW ERROR
     return callback(null, false);
   },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
 };
+
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // ✅ SAME config use karo
+app.options('*', cors(corsOptions));
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "https://www.talentgroupofindia.com");
