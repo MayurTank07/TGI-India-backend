@@ -27,26 +27,41 @@ connectDB();
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
-  'https://tgi-india-main.vercel.app',
-  process.env.FRONTEND_URL
-].filter(Boolean);
+  'http://localhost:5001',
+  'https://tgi-india-main.vercel.app'
+];
+
+// Add FRONTEND_URL if set
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
+console.log('🔒 CORS Allowed Origins:', allowedOrigins);
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    // Allow requests with no origin (like Postman, curl, or same-origin)
+    if (!origin) {
+      console.log('✅ CORS: Allowing request with no origin');
+      return callback(null, true);
+    }
     
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    console.log('🔍 CORS: Checking origin:', origin);
+    
+    if (allowedOrigins.includes(origin)) {
+      console.log('✅ CORS: Origin allowed:', origin);
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.log('❌ CORS: Origin blocked:', origin);
+      callback(new Error(`CORS policy: Origin ${origin} not allowed`));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 600 // Cache preflight for 10 minutes
+  maxAge: 600,
+  optionsSuccessStatus: 200
 }));
 
 // Security headers - configured to not interfere with CORS
@@ -61,12 +76,30 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'TG India Backend API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      api: '/api',
+      auth: '/api/auth',
+      content: '/api/content'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
     message: 'TGI Backend is running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage()
   });
 });
 
@@ -94,10 +127,14 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 // Start server
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/health`);
-  console.log(`🔗 API Base: http://localhost:${PORT}/api`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log('='.repeat(50));
+  console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode`);
+  console.log(`📡 Port: ${PORT}`);
+  console.log(`📍 Health: http://localhost:${PORT}/health`);
+  console.log(`🔗 API: http://localhost:${PORT}/api`);
+  console.log(`🌐 MongoDB: ${process.env.MONGODB_URI ? 'Connected' : 'Not configured'}`);
+  console.log('='.repeat(50));
   
   // Start keep-alive to prevent cold starts on Render
   if (process.env.NODE_ENV === 'production') {
