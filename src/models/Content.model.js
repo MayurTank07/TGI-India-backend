@@ -37,9 +37,6 @@ const contentSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for faster queries
-contentSchema.index({ section: 1 });
-
 const Content = mongoose.model('Content', contentSchema);
 
 export default Content;
