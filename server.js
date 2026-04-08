@@ -28,7 +28,9 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:5001',
-  'https://tgi-india-main.vercel.app'
+  'https://tgi-india-main.vercel.app',
+  'https://www.talentgroupofindia.com',
+  'https://talentgroupofindia.com'
 ];
 
 // Add FRONTEND_URL if set
