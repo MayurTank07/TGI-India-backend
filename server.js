@@ -13,6 +13,7 @@ import clientRoutes from './src/routes/client.routes.js';
 import teamRoutes from './src/routes/team.routes.js';
 import testimonialRoutes from './src/routes/testimonial.routes.js';
 import mediaRoutes from './src/routes/media.routes.js';
+import { startKeepAlive } from './src/utils/keepAlive.js';
 
 dotenv.config();
 
@@ -97,6 +98,12 @@ const server = app.listen(PORT, () => {
   console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
   console.log(`📍 Health check: http://localhost:${PORT}/health`);
   console.log(`🔗 API Base: http://localhost:${PORT}/api`);
+  
+  // Start keep-alive to prevent cold starts on Render
+  if (process.env.NODE_ENV === 'production') {
+    const serverUrl = process.env.SERVER_URL || 'https://tgi-india-backend.onrender.com';
+    startKeepAlive(serverUrl);
+  }
 });
 
 // Handle unhandled promise rejections
