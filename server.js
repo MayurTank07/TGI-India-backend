@@ -29,8 +29,8 @@ const allowedOrigins = [
   'http://localhost:5174',
   'http://localhost:5001',
   'https://tgi-india-main.vercel.app',
-  'https://www.talentgroupofindia.com',
-  'https://talentgroupofindia.com'
+  'https://www.talentgroupofindia.com/',
+  'https://talentgroupofindia.com/'
 ];
 
 // Add FRONTEND_URL if set
@@ -127,6 +127,29 @@ app.use((req, res) => {
 
 // Error handling middleware (must be last)
 app.use(errorHandler);
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    console.log('🔍 CORS: Checking origin:', origin);
+
+    if (allowedOrigins.includes(origin)) {
+      console.log('✅ CORS: Origin allowed:', origin);
+      return callback(null, true);
+    }
+
+    console.log('❌ CORS: Origin blocked:', origin);
+
+    // ❗ IMPORTANT: Don't throw error
+    return callback(null, false);
+  },
+  credentials: true
+}));
+
+app.options('*', cors());
 
 // Start server
 const server = app.listen(PORT, '0.0.0.0', () => {
